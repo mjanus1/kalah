@@ -34,7 +34,10 @@ public class GameControllerTest {
 
     @Test
     public void crateGame_shouldCreateGameWithSuccess() throws Exception {
-        GameDto dto = new GameDto("1", URL);
+        GameDto dto = GameDto.builder()
+                .id("1")
+                .uri(URL)
+                .build();
         Mockito.when(service.createGame()).thenReturn(dto);
         mockMvc.perform(post("/games"))
                 .andExpect(status().isCreated())
@@ -44,7 +47,10 @@ public class GameControllerTest {
 
     @Test
     public void getGame_shouldReturnSavedGameWithSuccess() throws Exception {
-        GameDto dto = new GameDto("1", URL);
+        GameDto dto = GameDto.builder()
+                .id("1")
+                .uri(URL)
+                .build();
         Mockito.when(service.getGame("1")).thenReturn(dto);
         mockMvc.perform(get("/games/1"))
                 .andExpect(status().isOk())

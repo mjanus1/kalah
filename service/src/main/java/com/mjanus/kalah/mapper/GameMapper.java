@@ -21,11 +21,19 @@ public class GameMapper {
     private final Environment environment;
 
     public GameDto toDto(Game game) {
-        return new GameDto(game.getId(), getUrl(game.getId()));
+        return GameDto.builder()
+                .id(game.getId())
+                .uri(getUrl(game.getId()))
+                .build();
     }
 
     public GameDto toFullDto(Game game) {
-        return new GameDto(game.getId(), getUrl(game.getId()), mapStatus(game.getBoard()));
+        return GameDto.builder()
+                .id(game.getId())
+                .uri(getUrl(game.getId()))
+                .status(mapStatus(game.getBoard()))
+                .playerTurn(game.getPlayerTurn())
+                .build();
     }
 
     private Map<Integer, Integer> mapStatus(Board board) {
