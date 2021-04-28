@@ -9,4 +9,8 @@ public enum Player {
     Player(final Integer houseIndex) {
         this.houseIndex = houseIndex;
     }
+
+    public Integer getHouseIndex() {
+        return houseIndex;
+    }
 }

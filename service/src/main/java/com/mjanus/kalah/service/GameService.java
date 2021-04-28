@@ -30,6 +30,8 @@ public interface GameService {
      * @return modified game
      * @throws com.mjanus.kalah.exception.GameNotFoundException
      *         if the gameId does not exist in database
+     * @throws com.mjanus.kalah.exception.WrongMoveException
+     *         if player use wrong pit or use home in game
      *
      */
     GameDto play(String gameId, Integer pitId);
