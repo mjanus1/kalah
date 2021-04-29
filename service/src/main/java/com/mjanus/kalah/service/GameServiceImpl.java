@@ -8,8 +8,8 @@ import com.mjanus.kalah.mapper.GameMapper;
 import com.mjanus.kalah.model.Game;
 import com.mjanus.kalah.model.Pit;
 import com.mjanus.kalah.repository.GameRepository;
-import com.mjanus.kalah.util.Constant;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +17,11 @@ import java.util.stream.IntStream;
 
 import static com.mjanus.kalah.model.Player.PLAYER_FIRST;
 import static com.mjanus.kalah.model.Player.PLAYER_SECOND;
-import static com.mjanus.kalah.util.Constant.EMPTY_STONES;
-import static com.mjanus.kalah.util.Constant.PIT_END_INDEX;
+import static com.mjanus.kalah.util.Constant.*;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class GameServiceImpl implements GameService {
 
     private final GameRepository repository;
@@ -33,6 +33,8 @@ public class GameServiceImpl implements GameService {
     public GameDto createGame() {
         Game game = new Game(gameConfig.getPitStones());
         repository.save(game);
+
+        log.info("Created game {}", game);
         return mapper.toDto(game);
     }
 
@@ -40,6 +42,8 @@ public class GameServiceImpl implements GameService {
     @Transactional(readOnly = true)
     public GameDto getGame(String gameId) {
         Game game = repository.findById(gameId).orElseThrow(() -> new GameNotFoundException("Can not find game: " + gameId));
+
+        log.info("Read game {}", game);
         return mapper.toFullDto(game);
     }
 
@@ -48,9 +52,11 @@ public class GameServiceImpl implements GameService {
     @Transactional
     public GameDto play(String gameId, int pitId) {
         Game game = repository.findById(gameId).orElseThrow(() -> new GameNotFoundException("Can not find game: " + gameId));
+        log.info("Game before make move {}", game);
 
         validateMove(game, pitId);
         makeMove(game, pitId);
+        log.info("Game after move {}", game);
 
         repository.save(game);
         return mapper.toFullDto(game);
@@ -78,7 +84,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private boolean isCorrectIndex(final int index) {
-        return IntStream.of(Constant.AVAILABLE_PITS_ID).anyMatch(i -> i == index);
+        return IntStream.of(AVAILABLE_PITS_ID).anyMatch(i -> i == index);
     }
 
     private void makeMove(final Game game, int pitId) {
@@ -94,7 +100,7 @@ public class GameServiceImpl implements GameService {
 
         actionForLastEmptyPit(game, pitId);
         determinePlayerTurn(game, pitId);
-        checkGameOver(game);
+        checkGameTerminate(game);
     }
 
     private void determinePlayerTurn(final Game game, final int lastPitId) {
@@ -127,7 +133,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void checkGameOver(final Game game) {
+    private void checkGameTerminate(final Game game) {
         final int firstPlayerStonesCount = game.getBoard().calculateStonesForPlayer(PLAYER_FIRST, false);
         final int secondPlayerStonesCount = game.getBoard().calculateStonesForPlayer(PLAYER_SECOND, false);
         if ((firstPlayerStonesCount == 0) || (secondPlayerStonesCount == 0)) {

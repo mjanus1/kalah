@@ -2,6 +2,7 @@ package com.mjanus.kalah.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.stream.IntStream;
 
@@ -12,6 +13,7 @@ import static com.mjanus.kalah.util.Constant.PLAYER_FIRST_HOUSE_ID;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class Pit {
     private final Integer index;
     private Integer stoneCount;

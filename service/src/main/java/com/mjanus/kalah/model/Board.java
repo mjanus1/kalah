@@ -2,6 +2,7 @@ package com.mjanus.kalah.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import static com.mjanus.kalah.util.Constant.*;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class Board {
     private List<Pit> pits;
 

@@ -31,7 +31,7 @@ public class Swagger {
                 .title("Kalah Game API")
                 .description("Java REST-full Web Service that runs a game of 6-stone Kalah")
                 .contact(contact)
-                .version("1.0.0")
+                .version("0.0.1")
                 .build();
 
     }
