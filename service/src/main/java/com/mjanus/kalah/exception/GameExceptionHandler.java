@@ -17,6 +17,13 @@ public class GameExceptionHandler {
     }
 
     @ResponseBody
+    @ExceptionHandler(WrongMoveException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String gameWrongMoveHandler(final WrongMoveException ex) {
+        return ex.getMessage();
+    }
+
+    @ResponseBody
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     String noIdentifyException(final Exception ex) {

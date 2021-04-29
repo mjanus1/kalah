@@ -85,7 +85,7 @@ public class GameControllerTest {
     public void play_shouldThrowExceptionWhenGameWhenWrongMove() throws Exception {
         Mockito.when(service.play("1", 1)).thenThrow(new WrongMoveException("Wrong move exception"));
         mockMvc.perform(put("/games/1/pits/1"))
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof WrongMoveException))
                 .andExpect(result -> Assertions.assertEquals("Wrong move exception", result.getResolvedException().getMessage()));
     }
