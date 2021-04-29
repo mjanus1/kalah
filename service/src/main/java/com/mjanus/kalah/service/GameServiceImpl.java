@@ -8,12 +8,16 @@ import com.mjanus.kalah.mapper.GameMapper;
 import com.mjanus.kalah.model.Game;
 import com.mjanus.kalah.model.Pit;
 import com.mjanus.kalah.repository.GameRepository;
+import com.mjanus.kalah.util.Constant;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.IntStream;
+
 import static com.mjanus.kalah.model.Player.PLAYER_FIRST;
 import static com.mjanus.kalah.model.Player.PLAYER_SECOND;
+import static com.mjanus.kalah.util.Constant.EMPTY_STONES;
 import static com.mjanus.kalah.util.Constant.PIT_END_INDEX;
 
 @Service
@@ -42,7 +46,7 @@ public class GameServiceImpl implements GameService {
     //TODO this part of api could be catchable for performance efficient
     @Override
     @Transactional
-    public GameDto play(String gameId, Integer pitId) {
+    public GameDto play(String gameId, int pitId) {
         Game game = repository.findById(gameId).orElseThrow(() -> new GameNotFoundException("Can not find game: " + gameId));
 
         validateMove(game, pitId);
@@ -52,27 +56,35 @@ public class GameServiceImpl implements GameService {
         return mapper.toFullDto(game);
     }
 
-    private void validateMove(final Game game, final Integer pitId) {
-        final Pit chosenPit = game.getBoard().getPit(pitId);
-
+    private void validateMove(final Game game, final int pitId) {
         if(game.getWinner() != null) {
             throw new WrongMoveException("Game over");
         }
+        if(!isCorrectIndex(pitId)) {
+            throw new WrongMoveException("Wrong pitId");
+        }
+
+        final Pit chosenPit = game.getBoard().getPit(pitId);
+
         if(chosenPit.isHouse()) {
             throw new WrongMoveException("Can not move pits from house");
         }
-        if (chosenPit.getStoneCount() == 0) {
+        if (chosenPit.getStoneCount() == EMPTY_STONES) {
             throw new WrongMoveException("Can not make move when pit is empty");
         }
         if(game.getPlayerTurn() != chosenPit.pitOwner()) {
-            throw new WrongMoveException("It is Player's " + game.getPlayerTurn().name() + "turn");
+            throw new WrongMoveException("It is Player " + game.getPlayerTurn().name() + " turn");
         }
     }
 
-    private void makeMove(final Game game, Integer pitId) {
+    private boolean isCorrectIndex(final int index) {
+        return IntStream.of(Constant.AVAILABLE_PITS_ID).anyMatch(i -> i == index);
+    }
+
+    private void makeMove(final Game game, int pitId) {
         final Pit chosenPit = game.getBoard().getPit(pitId);
         int stoneToDistribute = chosenPit.getStoneCount();
-        chosenPit.setStoneCount(0);
+        chosenPit.setStoneCount(EMPTY_STONES);
 
         while (stoneToDistribute > 0) {
             final Pit currentPit = game.getBoard().getPit(++pitId);
@@ -80,12 +92,12 @@ public class GameServiceImpl implements GameService {
             stoneToDistribute--;
         }
 
-        determinePlayerTurn(game, pitId);
         actionForLastEmptyPit(game, pitId);
+        determinePlayerTurn(game, pitId);
         checkGameOver(game);
     }
 
-    private void determinePlayerTurn(final Game game, final Integer lastPitId) {
+    private void determinePlayerTurn(final Game game, final int lastPitId) {
         final Pit pit = game.getBoard().getPit(lastPitId);
 
         if(pit.isHouse() && pit.pitOwner().equals(game.getPlayerTurn())) {
@@ -99,7 +111,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void actionForLastEmptyPit(final Game game, final Integer lastPitId) {
+    private void actionForLastEmptyPit(final Game game, final int lastPitId) {
         final Pit endPit = game.getBoard().getPit(lastPitId);
         if (!endPit.isHouse() && endPit.pitOwner().equals(game.getPlayerTurn()) && (endPit.getStoneCount() == 1)) {
 
@@ -109,8 +121,8 @@ public class GameServiceImpl implements GameService {
                 final Pit house = game.getBoard().getPit(game.getPlayerTurn().getHouseIndex());
 
                 house.addStones(endPit.getIndex() + opponentPit.getStoneCount());
-                opponentPit.setStoneCount(0);
-                endPit.setStoneCount(0);
+                opponentPit.setStoneCount(EMPTY_STONES);
+                endPit.setStoneCount(EMPTY_STONES);
             }
         }
     }

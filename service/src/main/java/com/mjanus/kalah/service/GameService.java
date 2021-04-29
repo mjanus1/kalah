@@ -34,5 +34,5 @@ public interface GameService {
      *         if player use wrong pit or use home in game
      *
      */
-    GameDto play(String gameId, Integer pitId);
+    GameDto play(String gameId, int pitId);
 }
