@@ -5,6 +5,7 @@ import com.mjanus.kalah.dto.GameDto;
 import com.mjanus.kalah.exception.GameNotFoundException;
 import com.mjanus.kalah.exception.WrongMoveException;
 import com.mjanus.kalah.mapper.GameMapper;
+import com.mjanus.kalah.model.Board;
 import com.mjanus.kalah.model.Game;
 import com.mjanus.kalah.model.Pit;
 import com.mjanus.kalah.repository.GameRepository;
@@ -126,7 +127,7 @@ public class GameServiceImpl implements GameService {
             if (opponentPit.getStoneCount() > 0) {
                 final Pit house = game.getBoard().getPit(game.getPlayerTurn().getHouseIndex());
 
-                house.addStones(endPit.getIndex() + opponentPit.getStoneCount());
+                house.addStones(endPit.getStoneCount() + opponentPit.getStoneCount());
                 opponentPit.setStoneCount(EMPTY_STONES);
                 endPit.setStoneCount(EMPTY_STONES);
             }
@@ -141,9 +142,14 @@ public class GameServiceImpl implements GameService {
             final Pit houseSecondPlayer = game.getBoard().getPit(PLAYER_SECOND.getHouseIndex());
             houseFirstPlayer.addStones(firstPlayerStonesCount);
             houseSecondPlayer.addStones(secondPlayerStonesCount);
+            cleanAllSmallPits(game.getBoard());
 
             determineWinner(game, houseFirstPlayer, houseSecondPlayer);
         }
+    }
+
+    private void cleanAllSmallPits(final Board board) {
+        board.cleanPits();
     }
 
     private void determineWinner(final Game game, final Pit houseFirstPlayer, final Pit houseSecondPlayer) {

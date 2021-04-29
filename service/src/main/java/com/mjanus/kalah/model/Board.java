@@ -2,6 +2,7 @@ package com.mjanus.kalah.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.stream.IntStream;
 import static com.mjanus.kalah.util.Constant.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
 public class Board {
@@ -29,6 +31,14 @@ public class Board {
                 .filter(p -> p.pitOwner().equals(player) && (includeHouse || !p.isHouse()))
                 .map(Pit::getStoneCount)
                 .reduce(0, Integer::sum);
+    }
+
+    public void cleanPits() {
+        pits.forEach(pit -> {
+            if(!pit.isHouse()) {
+                pit.setStoneCount(EMPTY_STONES);
+            }
+        });
     }
 
     private void initBoard(int pitStones) {
